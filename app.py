@@ -7,7 +7,7 @@ import streamlit.components.v1 as components
 # 1. PAGE CONFIGURATION & PWA METADATA
 # ==========================================
 st.set_page_config(
-    page_title="MomsNutriCare App",
+    page_title="MomsNutriCare",
     page_icon="🤰",
     layout="wide",
     initial_sidebar_state="expanded"
