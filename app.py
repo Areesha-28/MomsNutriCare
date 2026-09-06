@@ -1,4 +1,3 @@
-
 import streamlit as st
 from datetime import datetime, timedelta
 import streamlit.components.v1 as components
@@ -59,8 +58,12 @@ st.caption("🔬 **Designed & Engineered by Dn. Areesha Asif Awan** | Clinical D
 st.markdown("---")
 
 # ==========================================
-# 3. SIDEBAR: PATIENT INPUT DATA
+# 3. SIDEBAR: PATIENT INPUT DATA & CREATOR CREDIT
 # ==========================================
+st.sidebar.markdown("### 👩‍⚕️ **App Creator**")
+st.sidebar.info("**Dn. Areesha Asif Awan**\n\n*Clinical Dietitian & Public Health Researcher*")
+st.sidebar.markdown("---")
+
 st.sidebar.header("📋 Patient Clinical Inputs")
 
 # Demographics & Anthropometrics
@@ -122,25 +125,25 @@ if bmi < 18.5:
     bmi_category = "Underweight"
     iom_total_gain = "12.5 - 18.0 kg"
     trimester_1_gain = "1.0 - 3.0 kg"
-    weekly_rate_2nd_3rd = 0.51  # kg/week average (0.44 - 0.58)
+    weekly_rate_2nd_3rd = 0.51
     weekly_rate_str = "0.44 - 0.58 kg/week"
 elif 18.5 <= bmi < 25.0:
     bmi_category = "Normal Weight"
     iom_total_gain = "11.5 - 16.0 kg"
     trimester_1_gain = "1.0 - 2.0 kg"
-    weekly_rate_2nd_3rd = 0.42  # kg/week average (0.35 - 0.50)
+    weekly_rate_2nd_3rd = 0.42
     weekly_rate_str = "0.35 - 0.50 kg/week"
 elif 25.0 <= bmi < 30.0:
     bmi_category = "Overweight"
     iom_total_gain = "7.0 - 11.5 kg"
     trimester_1_gain = "0.5 - 2.0 kg"
-    weekly_rate_2nd_3rd = 0.28  # kg/week average (0.23 - 0.33)
+    weekly_rate_2nd_3rd = 0.28
     weekly_rate_str = "0.23 - 0.33 kg/week"
 else:
     bmi_category = "Obese"
     iom_total_gain = "5.0 - 9.0 kg"
     trimester_1_gain = "0.5 - 2.0 kg"
-    weekly_rate_2nd_3rd = 0.22  # kg/week average (0.17 - 0.27)
+    weekly_rate_2nd_3rd = 0.22
     weekly_rate_str = "0.17 - 0.27 kg/week"
 
 # C. Actual Weight Gain Analysis
@@ -152,11 +155,11 @@ if gestational_weeks <= 12:
     expected_target_max = 2.0
 else:
     weeks_past_1st_trimester = gestational_weeks - 12
-    base_1st_tri = 1.5  # midpoint average for 1st trimester
+    base_1st_tri = 1.5
     expected_target_min = base_1st_tri + (weeks_past_1st_trimester * (weekly_rate_2nd_3rd - 0.07))
     expected_target_max = base_1st_tri + (weeks_past_1st_trimester * (weekly_rate_2nd_3rd + 0.07))
 
-# C. BMR & TEE Calculations (Mifflin-St Jeor)
+# D. BMR & TEE Calculations (Mifflin-St Jeor)
 bmr = (10 * pre_weight_kg) + (6.25 * height_cm) - (5 * age) - 161
 baseline_tee = bmr * act_factor
 total_caloric_target = baseline_tee + trimester_addition
@@ -164,6 +167,9 @@ total_caloric_target = baseline_tee + trimester_addition
 # ==========================================
 # 5. DASHBOARD DISPLAY & RESULTS
 # ==========================================
+
+# Output Clinical Validation Tag
+st.success("🔬 **Clinical Assessment Results** | Designed & Validated by **Dn. Areesha Asif Awan**, Clinical Dietitian")
 
 col1, col2 = st.columns(2)
 
@@ -231,10 +237,21 @@ else:
     st.error(f"**Severe Gestational Anemia ({hb_level:.1f} g/dL):** Immediate clinical escalation and urgent medical review required.")
 
 # ==========================================
-# 8. FOOTER
+# 8. FOOTER WITH COMPLETE BRANDING
 # ==========================================
 st.markdown("---")
-st.caption("© MomsNutriCare | Clinical Decision-Support Tool | Developed for Maternal & Child Health Support")
+st.caption("© MomsNutriCare | **Designed & Engineered by Dn. Areesha Asif Awan** | Clinical Dietitian & Public Health Researcher")
+
+  
+
+    
+
+
+  
+
+
+
+
 
 
    
