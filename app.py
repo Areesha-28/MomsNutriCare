@@ -1,9 +1,10 @@
 import streamlit as st
 from datetime import datetime, timedelta
 
-# 1. Page Configuration & Browser Branding
-st.set_page_config(
-    page_title="MomsNutriCare | By Dn. Areesha Asif Awan",
+import streamlit as st
+
+st.set_page_config()
+    page_title="MomsNutriCare",
     page_icon="🤰",
     layout="wide"
 )
