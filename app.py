@@ -1,12 +1,20 @@
 
 import streamlit as st
-from datetime import datetime, timedelta
 
 st.set_page_config(
     page_title="MomsNutriCare",
     page_icon="🤰",
     layout="wide"
 )
+
+# Force web app metadata for Android/iOS installation
+st.markdown("""
+    <head>
+        <meta name="apple-mobile-web-app-title" content="MomsNutriCare">
+        <meta name="application-name" content="MomsNutriCare">
+    </head>
+""", unsafe_allow_html=True)
+
 
 # 2. Main Title & Branding Banner
 st.title("🤰 MomsNutriCare: Clinical MNT Calculator")
