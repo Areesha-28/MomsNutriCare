@@ -1,4 +1,5 @@
-import streamlit as st
+
+  import streamlit as st
 from datetime import datetime, timedelta
 import streamlit.components.v1 as components
 
@@ -66,6 +67,7 @@ st.sidebar.header("📋 Patient Clinical Inputs")
 age = st.sidebar.number_input("Age (years)", min_value=15, max_value=50, value=25, step=1)
 height_cm = st.sidebar.number_input("Height (cm)", min_value=120.0, max_value=200.0, value=162.0, step=0.1)
 pre_weight_kg = st.sidebar.number_input("Pre-Pregnancy Weight (kg)", min_value=30.0, max_value=150.0, value=58.0, step=0.1)
+current_weight_kg = st.sidebar.number_input("Current Weight (kg)", min_value=30.0, max_value=160.0, value=62.0, step=0.1)
 
 # Obstetrics & Physical Activity
 lmp_date = st.sidebar.date_input(
@@ -98,8 +100,8 @@ hb_level = st.sidebar.number_input("Hemoglobin Level (g/dL)", min_value=5.0, max
 # A. Gestational Age & EDD (Naegele's Rule)
 edd_date = lmp_date + timedelta(days=280)
 days_pregnant = (datetime.today().date() - lmp_date).days
-gestational_weeks = days_pregnant // 7
-gestational_days_rem = days_pregnant % 7
+gestational_weeks = max(0, days_pregnant // 7)
+gestational_days_rem = max(0, days_pregnant % 7)
 
 if gestational_weeks < 13:
     trimester = "1st Trimester"
@@ -115,18 +117,44 @@ else:
 height_m = height_cm / 100.0
 bmi = pre_weight_kg / (height_m ** 2)
 
+# Weight Gain Parameters based on Institute of Medicine (IOM) Guidelines
 if bmi < 18.5:
     bmi_category = "Underweight"
-    iom_weight_gain = "12.5 - 18.0 kg"
+    iom_total_gain = "12.5 - 18.0 kg"
+    trimester_1_gain = "1.0 - 3.0 kg"
+    weekly_rate_2nd_3rd = 0.51  # kg/week average (0.44 - 0.58)
+    weekly_rate_str = "0.44 - 0.58 kg/week"
 elif 18.5 <= bmi < 25.0:
     bmi_category = "Normal Weight"
-    iom_weight_gain = "11.5 - 16.0 kg"
+    iom_total_gain = "11.5 - 16.0 kg"
+    trimester_1_gain = "1.0 - 2.0 kg"
+    weekly_rate_2nd_3rd = 0.42  # kg/week average (0.35 - 0.50)
+    weekly_rate_str = "0.35 - 0.50 kg/week"
 elif 25.0 <= bmi < 30.0:
     bmi_category = "Overweight"
-    iom_weight_gain = "7.0 - 11.5 kg"
+    iom_total_gain = "7.0 - 11.5 kg"
+    trimester_1_gain = "0.5 - 2.0 kg"
+    weekly_rate_2nd_3rd = 0.28  # kg/week average (0.23 - 0.33)
+    weekly_rate_str = "0.23 - 0.33 kg/week"
 else:
     bmi_category = "Obese"
-    iom_weight_gain = "5.0 - 9.0 kg"
+    iom_total_gain = "5.0 - 9.0 kg"
+    trimester_1_gain = "0.5 - 2.0 kg"
+    weekly_rate_2nd_3rd = 0.22  # kg/week average (0.17 - 0.27)
+    weekly_rate_str = "0.17 - 0.27 kg/week"
+
+# C. Actual Weight Gain Analysis
+actual_weight_gain = current_weight_kg - pre_weight_kg
+
+# Expected Target Weight Gain Calculation for Current Week
+if gestational_weeks <= 12:
+    expected_target_min = 0.5
+    expected_target_max = 2.0
+else:
+    weeks_past_1st_trimester = gestational_weeks - 12
+    base_1st_tri = 1.5  # midpoint average for 1st trimester
+    expected_target_min = base_1st_tri + (weeks_past_1st_trimester * (weekly_rate_2nd_3rd - 0.07))
+    expected_target_max = base_1st_tri + (weeks_past_1st_trimester * (weekly_rate_2nd_3rd + 0.07))
 
 # C. BMR & TEE Calculations (Mifflin-St Jeor)
 bmr = (10 * pre_weight_kg) + (6.25 * height_cm) - (5 * age) - 161
@@ -147,9 +175,11 @@ with col1:
     
     st.markdown("---")
     
-    st.subheader("⚖️ Pre-Pregnancy BMI & Weight Targets (IOM)")
+    st.subheader("⚖️ BMI & Trimester Weight Gain Targets (IOM)")
     st.write(f"**Pre-Pregnancy BMI:** {bmi:.1f} kg/m² ({bmi_category})")
-    st.write(f"**Target Gestational Weight Gain:** {iom_weight_gain}")
+    st.write(f"**Total Recommended Weight Gain:** {iom_total_gain}")
+    st.write(f"**1st Trimester Total Target:** {trimester_1_gain}")
+    st.write(f"**2nd & 3rd Trimester Rate:** {weekly_rate_str}")
 
 with col2:
     st.subheader("🔥 Energy Requirement Breakdown (Mifflin-St Jeor)")
@@ -168,7 +198,26 @@ with col2:
 st.markdown("---")
 
 # ==========================================
-# 6. GESTATIONAL ANEMIA SCREENING (WHO)
+# 6. ACTUAL VS EXPECTED WEIGHT GAIN EVALUATION
+# ==========================================
+st.subheader("📈 Gestational Weight Gain Progress")
+
+col3, col4, col5 = st.columns(3)
+col3.metric(label="Current Weight", value=f"{current_weight_kg:.1f} kg")
+col4.metric(label="Total Weight Gained", value=f"{actual_weight_gain:+.1f} kg")
+col5.metric(label=f"Target Gain at Week {gestational_weeks}", value=f"{expected_target_min:.1f} - {expected_target_max:.1f} kg")
+
+if actual_weight_gain < expected_target_min:
+    st.warning(f"⚠️ **Below Target:** Actual weight gain ({actual_weight_gain:+.1f} kg) is below the expected target range ({expected_target_min:.1f} to {expected_target_max:.1f} kg) for Week {gestational_weeks}. Review caloric intake and nutrient density.")
+elif actual_weight_gain > expected_target_max:
+    st.info(f"⚠️ **Above Target:** Actual weight gain ({actual_weight_gain:+.1f} kg) exceeds the recommended target range ({expected_target_min:.1f} to {expected_target_max:.1f} kg) for Week {gestational_weeks}. Monitor glycemic control and physical activity.")
+else:
+    st.success(f"✅ **On Target:** Actual weight gain ({actual_weight_gain:+.1f} kg) is within the recommended IOM range for Week {gestational_weeks}.")
+
+st.markdown("---")
+
+# ==========================================
+# 7. GESTATIONAL ANEMIA SCREENING (WHO)
 # ==========================================
 st.subheader("🩸 Gestational Anemia Screening (WHO Criteria)")
 
@@ -182,10 +231,15 @@ else:
     st.error(f"**Severe Gestational Anemia ({hb_level:.1f} g/dL):** Immediate clinical escalation and urgent medical review required.")
 
 # ==========================================
-# 7. FOOTER
+# 8. FOOTER
 # ==========================================
 st.markdown("---")
 st.caption("© MomsNutriCare | Clinical Decision-Support Tool | Developed for Maternal & Child Health Support")
+
+
+   
+
+
 
 
 
